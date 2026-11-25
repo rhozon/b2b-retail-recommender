@@ -106,21 +106,27 @@ def gain_curve(score: np.ndarray, tau: np.ndarray, grid=GRID) -> np.ndarray:
 def run(f: pd.DataFrame, y0: pd.Series, reps: int = 10, seed: int = 0, scale: float = 1.0) -> tuple[pd.DataFrame, pd.DataFrame]:
     """Curves (mean over replications) and the area under each curve relative to the oracle."""
     X = f[X_COLS].to_numpy(dtype=float)
+    # Spend varies by orders of magnitude between customers. Dividing the outcome by a
+    # pre-treatment covariate (past monthly revenue, floored at 10) keeps the effect estimates
+    # unbiased under random assignment and takes most of that scale out of the noise; the
+    # estimates are multiplied back to currency before ranking.
+    unit = np.maximum(f["monthly_revenue"].to_numpy(dtype=float), 10.0)
     curves, areas = [], []
     for r in range(reps):
         t, y, tau = simulate(f, y0, seed + r, scale)
         scores = {
-            "x_learner": x_learner(X, t, y, seed + r),
-            "t_learner": t_learner(X, t, y, seed + r),
-            "dr_learner": dr_learner(X, t, y, seed + r),
+            "x_learner": x_learner(X, t, y / unit, seed + r) * unit,
+            "t_learner": t_learner(X, t, y / unit, seed + r) * unit,
+            "dr_learner": dr_learner(X, t, y / unit, seed + r) * unit,
+            "x_learner_raw": x_learner(X, t, y, seed + r),
             "top_spenders": f["monetary"].to_numpy(),
             "most_lapsed": f["recency_days"].to_numpy(),
             "oracle": tau,
         }
         rand = GRID * tau.sum()
         oracle_area = np.trapezoid(gain_curve(tau, tau) - rand, GRID)
-        for name, s in scores.items():
-            g = gain_curve(s, tau)
+        for name, score in scores.items():
+            g = gain_curve(score, tau)
             curves.append(pd.DataFrame({"rep": r, "policy": name, "q": GRID, "gain": g}))
             areas.append({"rep": r, "policy": name, "area_vs_oracle": float(np.trapezoid(g - rand, GRID) / oracle_area)})
         curves.append(pd.DataFrame({"rep": r, "policy": "random", "q": GRID, "gain": rand}))

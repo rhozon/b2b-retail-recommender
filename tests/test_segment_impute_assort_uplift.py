@@ -78,3 +78,19 @@ def test_true_effect_signs():
     f = pd.DataFrame({"monthly_revenue": [100.0, 100.0], "recency_days": [300, 5], "frequency": [3, 60]})
     tau = uplift.true_effect(f)
     assert tau[0] > 0 > tau[1]
+
+
+def test_uplift_replications_do_not_leak_state():
+    # replication r of a multi-replication run must equal a run started at seed r
+    rng = np.random.default_rng(1)
+    n = 1200
+    rec = rng.integers(1, 400, n)
+    freq = rng.integers(1, 60, n)
+    m = rng.lognormal(5, 1, n)
+    f = pd.DataFrame({"recency_days": rec, "frequency": freq, "monthly_revenue": m, "monetary": m * 12,
+                      "log_recency": np.log1p(rec), "log_frequency": np.log(freq), "log_monetary": np.log1p(m * 12),
+                      "log_lines_per_invoice": 1.0, "log_distinct_products": 1.0, "uk": 1, "first_days": 365})
+    y0 = pd.Series(rng.exponential(0.2 * m), index=f.index)
+    both = uplift.run(f, y0, reps=2, seed=0)[1].set_index("policy")
+    alone = [uplift.run(f, y0, reps=1, seed=k)[1].set_index("policy").loc["x_learner", "mean"] for k in (0, 1)]
+    assert np.allclose(sorted(alone), [both.loc["x_learner", "min"], both.loc["x_learner", "max"]])

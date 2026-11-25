@@ -60,6 +60,7 @@ def main(argv=None) -> None:
     ap.add_argument("--out", default="results")
     ap.add_argument("--site", default=None, help="folder for the simulator data (assets/case10)")
     ap.add_argument("--quick", action="store_true")
+    ap.add_argument("--reuse-uplift", action="store_true", help="keep the promotion results already in --out")
     a = ap.parse_args(argv)
     out = Path(a.out)
     out.mkdir(parents=True, exist_ok=True)
@@ -177,11 +178,15 @@ def main(argv=None) -> None:
 
     log("promotion targeting (semi-synthetic)")
     y0 = sp.test.groupby("customer_id")["revenue"].sum()
-    curves, areas = uplift.run(f, y0, reps=3 if a.quick else 10)
-    curves.to_csv(out / "uplift_curves.csv", index=False)
-    areas.to_csv(out / "uplift_area.csv", index=False)
-    sens = uplift.sensitivity(f, y0, reps=2 if a.quick else 5)
-    sens.to_csv(out / "uplift_sensitivity.csv", index=False)
+    if a.reuse_uplift and (out / "uplift_curves.csv").exists():
+        # the promotion step does not depend on the recommenders; reuse its files
+        curves, areas = pd.read_csv(out / "uplift_curves.csv"), pd.read_csv(out / "uplift_area.csv")
+    else:
+        curves, areas = uplift.run(f, y0, reps=3 if a.quick else 10)
+        curves.to_csv(out / "uplift_curves.csv", index=False)
+        areas.to_csv(out / "uplift_area.csv", index=False)
+        sens = uplift.sensitivity(f, y0, reps=2 if a.quick else 5)
+        sens.to_csv(out / "uplift_sensitivity.csv", index=False)
     summary["uplift"] = areas.set_index("policy")["mean"].to_dict()
 
     (out / "summary.json").write_text(json.dumps(summary, indent=2, default=str))
