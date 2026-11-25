@@ -67,6 +67,14 @@ unit price 3.36 against 1.97), which points to another channel.
 12.6% of the segment's test-window revenue and reaches 76.8% of its customers, against 11.6%
 and 72.6% for the segment's top sellers and 11.9% and 72.3% for the overall top sellers.
 
+**Promotions (semi-synthetic).** Area under the gain curve relative to the oracle, mean of 10
+replications on the 5,472 customers with history: X-learner 0.225, DR-learner 0.205,
+T-learner 0.158, X-learner on the unscaled outcome 0.132, top spenders first 0.122, most
+lapsed first 0.449. At a budget of 20% of customers the X-learner brings 39,590 of true
+incremental revenue against 21,940 at random. The rule "most lapsed first" matches the
+simulated mechanism; with the effect scaled by 2 and 4 the X-learner reaches 0.411 and 0.605
+(`results/uplift_sensitivity.csv`).
+
 ## Run it
 
 Python 3.11 or later:

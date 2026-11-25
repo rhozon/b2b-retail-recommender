@@ -1,0 +1,10 @@
+segment,plan,revenue_share,customers_reached,families
+"Mid-value, lapsed",Optimised (family cap),0.08078632505733156,0.6937869822485208,15
+"Mid-value, lapsed",Segment top sellers,0.08509354649785966,0.7041420118343196,12
+"Mid-value, lapsed",Overall top sellers,0.06672224944592395,0.6272189349112426,9
+"Low-value, lapsed",Optimised (family cap),0.04528741624280506,0.4175824175824176,14
+"Low-value, lapsed",Segment top sellers,0.04897614226574021,0.4010989010989011,12
+"Low-value, lapsed",Overall top sellers,0.04025215376261463,0.43956043956043955,9
+"Top, active",Optimised (family cap),0.12556807854167606,0.7679324894514767,12
+"Top, active",Segment top sellers,0.11605555516667158,0.7257383966244726,7
+"Top, active",Overall top sellers,0.11871668911019696,0.7232067510548523,9

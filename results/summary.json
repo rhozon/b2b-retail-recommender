@@ -1,0 +1,124 @@
+{
+  "data": {
+    "lines": 1067371,
+    "sale_lines": 1003214,
+    "first": "2009-12-01",
+    "last": "2011-12-09",
+    "customers": 5852,
+    "products": 4707,
+    "invoices": 39516,
+    "missing_customer_line_share": 0.22591092229574147,
+    "missing_customer_revenue_share": 0.13104742264160565
+  },
+  "tuning": {
+    "best": {
+      "neighbours": 50,
+      "als": [
+        32,
+        10.0
+      ],
+      "epochs": 16
+    },
+    "validation_ndcg": {
+      "knn_50": 0.06741273816685636,
+      "knn_200": 0.0599139086179881,
+      "als_32_10": 0.06476461286945501,
+      "als_64_10": 0.060520925036230626,
+      "als_64_40": 0.04488862328739755,
+      "seq_epoch_1": 0.030570757232411556,
+      "seq_epoch_2": 0.03218828697116872,
+      "seq_epoch_3": 0.040590035281042235,
+      "seq_epoch_4": 0.047710408648593654,
+      "seq_epoch_5": 0.05326937795714853,
+      "seq_epoch_6": 0.059577297754292206,
+      "seq_epoch_7": 0.06532741920026308,
+      "seq_epoch_8": 0.07222622158384472,
+      "seq_epoch_9": 0.06897042935004283,
+      "seq_epoch_10": 0.07666344545711093,
+      "seq_epoch_11": 0.07527977403081056,
+      "seq_epoch_12": 0.07667806538566546,
+      "seq_epoch_13": 0.07923454273558317,
+      "seq_epoch_14": 0.07907753816442438,
+      "seq_epoch_15": 0.0779548646127336,
+      "seq_epoch_16": 0.08145345772943667,
+      "seq_epoch_17": 0.08117908345191598,
+      "seq_epoch_18": 0.07861573514708985,
+      "seq_epoch_19": 0.07901673788795524,
+      "seq_epoch_20": 0.07566543401965989,
+      "seq_epoch_21": 0.07722986268927931,
+      "seq_epoch_22": 0.07637953500096774,
+      "seq_epoch_23": 0.07816222070731789,
+      "seq_epoch_24": 0.07743561495344436,
+      "seq_epoch_25": 0.07817479963711889,
+      "seq_epoch_26": 0.07716059812982713,
+      "seq_epoch_27": 0.07750530376163804,
+      "seq_epoch_28": 0.07636386895690384,
+      "seq_epoch_29": 0.0753526230566517,
+      "seq_epoch_30": 0.07462004553966908
+    }
+  },
+  "split": {
+    "cutoff": "2011-10-09",
+    "train_customers": 5472,
+    "train_products": 4529,
+    "cold_revenue_share": 0.1252534984228416
+  },
+  "recs": {
+    "new to the customer": {
+      "best": "Sequential GRU (PyTorch)",
+      "runner_up": "Implicit ALS",
+      "ndcg_diff": 0.0015948870716424237,
+      "diff_lo": -0.0044332440385739975,
+      "diff_hi": 0.0072777222633803144
+    },
+    "all products": {
+      "best": "Buy again",
+      "runner_up": "Sequential GRU (PyTorch)",
+      "ndcg_diff": 0.0810472707963047,
+      "diff_lo": 0.0726721803448463,
+      "diff_hi": 0.09001099280826116
+    }
+  },
+  "segments": {
+    "k": 3,
+    "silhouette": {
+      "3": 0.29510679088610525,
+      "4": 0.24383517344820377,
+      "5": 0.26881505524092153,
+      "6": 0.26909443005946015
+    }
+  },
+  "imputation": {
+    "invoices": 4790,
+    "share_known_customer": 0.8782881002087682,
+    "profile_match_acc@1_known": 0.22462562396006655,
+    "profile_match_acc@1_all": 0.19728601252609604,
+    "profile_match_acc@5_known": 0.3895887806037556,
+    "profile_match_acc@5_all": 0.34217118997912316,
+    "profile_match_acc@10_known": 0.46256239600665555,
+    "profile_match_acc@10_all": 0.4062630480167015,
+    "busiest_in_country_acc@1_known": 0.04444972664606608,
+    "busiest_in_country_acc@1_all": 0.03903966597077244,
+    "busiest_in_country_acc@5_known": 0.08818635607321132,
+    "busiest_in_country_acc@5_all": 0.07745302713987474,
+    "busiest_in_country_acc@10_known": 0.1110054670786784,
+    "busiest_in_country_acc@10_all": 0.09749478079331941,
+    "missing_invoices": 2922,
+    "missing_median_lines": 20.0,
+    "known_median_lines": 15.0,
+    "missing_median_price": 3.36,
+    "known_median_price": 1.9725000000000001,
+    "window_missing_invoices": 227,
+    "window_confident": 29
+  },
+  "uplift": {
+    "dr_learner": 0.20510690633749057,
+    "most_lapsed": 0.44907049110270414,
+    "oracle": 1.0,
+    "random": 0.0,
+    "t_learner": 0.15849505230378533,
+    "top_spenders": 0.1216248722459627,
+    "x_learner": 0.22480248806289752,
+    "x_learner_raw": 0.13191908770856053
+  }
+}

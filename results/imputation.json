@@ -1,0 +1,50 @@
+{
+  "invoices": 4790,
+  "share_known_customer": 0.8782881002087682,
+  "profile_match_acc@1_known": 0.22462562396006655,
+  "profile_match_acc@1_all": 0.19728601252609604,
+  "profile_match_acc@5_known": 0.3895887806037556,
+  "profile_match_acc@5_all": 0.34217118997912316,
+  "profile_match_acc@10_known": 0.46256239600665555,
+  "profile_match_acc@10_all": 0.4062630480167015,
+  "busiest_in_country_acc@1_known": 0.04444972664606608,
+  "busiest_in_country_acc@1_all": 0.03903966597077244,
+  "busiest_in_country_acc@5_known": 0.08818635607321132,
+  "busiest_in_country_acc@5_all": 0.07745302713987474,
+  "busiest_in_country_acc@10_known": 0.1110054670786784,
+  "busiest_in_country_acc@10_all": 0.09749478079331941,
+  "confidence_curve": [
+    {
+      "coverage": 0.1,
+      "threshold": 0.49222904164981135,
+      "precision": 0.2588726513569937
+    },
+    {
+      "coverage": 0.25,
+      "threshold": 0.3746650333715792,
+      "precision": 0.24123539232053423
+    },
+    {
+      "coverage": 0.5,
+      "threshold": 0.2790902721152283,
+      "precision": 0.22881002087682673
+    },
+    {
+      "coverage": 0.75,
+      "threshold": 0.2212176330831284,
+      "precision": 0.20378619153674832
+    },
+    {
+      "coverage": 1.0,
+      "threshold": 0.0,
+      "precision": 0.19728601252609604
+    }
+  ],
+  "missing_invoices": 2922,
+  "missing_median_lines": 20.0,
+  "known_median_lines": 15.0,
+  "missing_median_price": 3.36,
+  "known_median_price": 1.9725000000000001,
+  "window_missing_invoices": 227,
+  "window_confident": 29
+}
