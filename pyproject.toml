@@ -1,0 +1,32 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "b2b-retail-recommender"
+version = "0.1.0"
+description = "Recommendations, segmentation, missing-customer imputation, assortment and promotion targeting for a B2B wholesaler, on the public Online Retail II transactions."
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "MIT" }
+authors = [{ name = "Rodrigo Hermont Ozon" }]
+dependencies = [
+    "numpy>=1.26",
+    "pandas>=2.1",
+    "pyarrow>=14",
+    "scipy>=1.11",
+    "scikit-learn>=1.4",
+    "torch>=2.2",
+    "python-calamine>=0.2",
+]
+
+[project.optional-dependencies]
+spark = ["pyspark>=3.5"]
+dev = ["pytest>=8"]
+
+[tool.setuptools.packages.find]
+include = ["b2bretail*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["tests", "."]
