@@ -29,6 +29,10 @@ are wholesalers. The code downloads nothing by itself: put `online_retail_II.xls
 | Assortment | `assortment.py` | Mixed-integer program: 30 products per segment, at most 4 per product family |
 | Promotions | `uplift.py` | Semi-synthetic randomised voucher on real customers; T-, X- and DR-learners against simple rules |
 | Spark | `spark/etl_als.py` | Same cleaning rules in PySpark and Spark MLlib implicit ALS; CI checks parity with pandas |
+| Transformers (v2) | `sasrec.py` | SASRec (Kang and McAuley, 2018) read product by product, and the same self-attention encoder read basket by basket |
+| Real campaigns (v2) | `promos.py` | The Complete Journey (84.51°): effect of three real campaigns with cross-fitted AIPW, a placebo on the weeks before, difference in differences, DR-learner, best linear predictor test, AIPW policy values and a budget knapsack |
+| Lakehouse (v2) | `lake.py`, `databricks.yml`, `databricks/` | Bronze, silver and gold Delta tables (delta-rs); a Databricks Asset Bundle that runs the same pipeline as a job on Unity Catalog |
+| Tracking (v2) | `tracking.py` | MLflow run with the tuned settings, every model's metrics and the result files |
 
 ## Results
 
@@ -75,6 +79,40 @@ incremental revenue against 21,940 at random. The rule "most lapsed first" match
 simulated mechanism; with the effect scaled by 2 and 4 the X-learner reaches 0.411 and 0.605
 (`results/uplift_sensitivity.csv`).
 
+## Version 2: what changed
+
+Added on 27 November 2026: two transformer recommenders, real promotion campaigns, Delta tables,
+MLflow tracking and a Databricks job. The promotion data comes from The Complete Journey, the
+same public panel as [basket-microeconometrics](https://github.com/rhozon/basket-microeconometrics);
+its `r/fetch.R` downloads it to `~/data/completejourney` (or set `CJ_DIR`).
+
+**Transformers.** Same split, same test window, epochs picked on the validation window
+(11 for the product-by-product SASRec, 38 for the basket-by-basket one). NDCG@10:
+
+| Model | New to the customer | All products |
+|---|---:|---:|
+| Sequential GRU (PyTorch) | 0.071 (0.066 to 0.077) | 0.260 (0.249 to 0.271) |
+| Implicit ALS | 0.070 (0.064 to 0.075) | 0.196 (0.187 to 0.205) |
+| SASRec, basket by basket | 0.069 (0.063 to 0.074) | 0.251 (0.240 to 0.262) |
+| SASRec, product by product | 0.017 (0.014 to 0.019) | 0.075 (0.069 to 0.081) |
+
+Read product by product, SASRec fails here: inside a wholesale order the products have no
+order, so "the next product" is noise. Read basket by basket, it ties with the GRU and ALS.
+
+**Real campaigns** (The Complete Journey, three "Type A" campaigns, each reaching about 1,100
+of the 2,215 to 2,273 households active before it), weekly spend per household in US$:
+
+| Campaign | Raw difference | Adjusted (AIPW) | Placebo, weeks before (AIPW) | Change in spend (AIPW) |
+|---|---:|---:|---:|---:|
+| 8 (May-June 2017) | +33.7 | +7.6 ± 7.2 | +5.2 ± 6.9 | +2.7 ± 5.2 |
+| 13 (August-September) | +36.6 | +3.9 ± 12.6 | +0.3 ± 11.9 | +2.1 ± 7.3 |
+| 18 (November-December) | +36.3 | -0.2 ± 9.3 | +1.0 ± 6.3 | -1.2 ± 5.7 |
+
+The raw gap is selection: households that got a campaign already spent about US$ 35 a week more
+before it. After adjustment no campaign has a detectable effect on spend, the smallest effect
+this design could detect is US$ 7.5 to 10.5 a week, and the best linear predictor test finds no
+heterogeneity the DR-learner can rank on (slopes 0.10, 0.00 and 0.15, none clearly above zero).
+
 ## Run it
 
 Python 3.11 or later:
@@ -82,8 +120,22 @@ Python 3.11 or later:
 ```bash
 pip install -e ".[dev]"
 pytest -v
-python -m b2bretail.cli --out results --site path/to/assets/case10
+python -m b2bretail.cli --out results --site path/to/assets/case10     --lake lake --track sqlite:///mlflow.db       # Delta tables and an MLflow run
+python -m b2bretail.promos --out results           # real campaigns (The Complete Journey)
+python -m b2bretail.export_v2 results path/to/assets/case10/data_v2.json
+mlflow ui --backend-store-uri sqlite:///mlflow.db  # browse the runs
 ```
+
+On Databricks, with the Databricks CLI and a workspace:
+
+```bash
+databricks bundle validate -t dev
+databricks bundle deploy -t dev
+databricks bundle run b2b_retail_pipeline -t dev
+```
+
+The bundle has not been deployed to a workspace from this repository; CI checks that it parses,
+that every task points to a file here and that each task script compiles.
 
 The full run takes about 20 minutes on a laptop CPU. The Spark job needs Java 17 and
 `pip install -e ".[spark]"`:

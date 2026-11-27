@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "b2b-retail-recommender"
-version = "0.1.0"
+version = "0.2.0"
 description = "Recommendations, segmentation, missing-customer imputation, assortment and promotion targeting for a B2B wholesaler, on the public Online Retail II transactions."
 readme = "README.md"
 requires-python = ">=3.11"
@@ -18,11 +18,13 @@ dependencies = [
     "scikit-learn>=1.4",
     "torch>=2.2",
     "python-calamine>=0.2",
+    "deltalake>=0.25",
 ]
 
 [project.optional-dependencies]
 spark = ["pyspark>=3.5"]
-dev = ["pytest>=8"]
+track = ["mlflow>=3"]
+dev = ["pytest>=8", "pyyaml>=6", "mlflow>=3"]
 
 [tool.setuptools.packages.find]
 include = ["b2bretail*"]

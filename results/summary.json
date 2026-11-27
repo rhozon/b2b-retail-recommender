@@ -17,7 +17,9 @@
         32,
         10.0
       ],
-      "epochs": 16
+      "epochs": 16,
+      "sasrec_items_epochs": 11,
+      "sasrec_baskets_epochs": 38
     },
     "validation_ndcg": {
       "knn_50": 0.06741273816685636,
@@ -54,7 +56,59 @@
       "seq_epoch_27": 0.07750530376163804,
       "seq_epoch_28": 0.07636386895690384,
       "seq_epoch_29": 0.0753526230566517,
-      "seq_epoch_30": 0.07462004553966908
+      "seq_epoch_30": 0.07462004553966908,
+      "sasrec_items_epoch_1": 0.0023509089261601057,
+      "sasrec_items_epoch_2": 0.003102296193393838,
+      "sasrec_items_epoch_3": 0.007139793611772497,
+      "sasrec_items_epoch_4": 0.012302925380578407,
+      "sasrec_items_epoch_5": 0.01595476295159609,
+      "sasrec_items_epoch_6": 0.017599768936282775,
+      "sasrec_items_epoch_7": 0.018628130596529686,
+      "sasrec_items_epoch_8": 0.018695869754452372,
+      "sasrec_items_epoch_9": 0.018031745561423358,
+      "sasrec_items_epoch_10": 0.017498901729040756,
+      "sasrec_items_epoch_11": 0.018839111907110635,
+      "sasrec_items_epoch_12": 0.0183067933917283,
+      "sasrec_baskets_epoch_1": 0.029604810309802998,
+      "sasrec_baskets_epoch_2": 0.02987018899706417,
+      "sasrec_baskets_epoch_3": 0.03120582170478834,
+      "sasrec_baskets_epoch_4": 0.03130350858567924,
+      "sasrec_baskets_epoch_5": 0.03204514621287048,
+      "sasrec_baskets_epoch_6": 0.03330679658670841,
+      "sasrec_baskets_epoch_7": 0.03735709827259683,
+      "sasrec_baskets_epoch_8": 0.04436671698765282,
+      "sasrec_baskets_epoch_9": 0.048215279256249674,
+      "sasrec_baskets_epoch_10": 0.051124915854641295,
+      "sasrec_baskets_epoch_11": 0.050995274494514,
+      "sasrec_baskets_epoch_12": 0.05488325859858792,
+      "sasrec_baskets_epoch_13": 0.06001748019506832,
+      "sasrec_baskets_epoch_14": 0.055543851390777825,
+      "sasrec_baskets_epoch_15": 0.06402934733481902,
+      "sasrec_baskets_epoch_16": 0.06426863332063792,
+      "sasrec_baskets_epoch_17": 0.06439491846607184,
+      "sasrec_baskets_epoch_18": 0.0675664744771507,
+      "sasrec_baskets_epoch_19": 0.06520473880430282,
+      "sasrec_baskets_epoch_20": 0.06497897072099068,
+      "sasrec_baskets_epoch_21": 0.06489620546680303,
+      "sasrec_baskets_epoch_22": 0.06706536446750926,
+      "sasrec_baskets_epoch_23": 0.06974195443954342,
+      "sasrec_baskets_epoch_24": 0.06923026605341204,
+      "sasrec_baskets_epoch_25": 0.0702820299402311,
+      "sasrec_baskets_epoch_26": 0.07268266018065112,
+      "sasrec_baskets_epoch_27": 0.07236145202064614,
+      "sasrec_baskets_epoch_28": 0.07052816743030282,
+      "sasrec_baskets_epoch_29": 0.07211901637178443,
+      "sasrec_baskets_epoch_30": 0.0757183661818481,
+      "sasrec_baskets_epoch_31": 0.07275996739288966,
+      "sasrec_baskets_epoch_32": 0.07117757541127168,
+      "sasrec_baskets_epoch_33": 0.0762615747091452,
+      "sasrec_baskets_epoch_34": 0.07355784776812749,
+      "sasrec_baskets_epoch_35": 0.0749308666117873,
+      "sasrec_baskets_epoch_36": 0.07322052206606196,
+      "sasrec_baskets_epoch_37": 0.07535508360042342,
+      "sasrec_baskets_epoch_38": 0.07789906749260335,
+      "sasrec_baskets_epoch_39": 0.0763942283228747,
+      "sasrec_baskets_epoch_40": 0.07688543312258624
     }
   },
   "split": {
@@ -112,13 +166,36 @@
     "window_confident": 29
   },
   "uplift": {
-    "dr_learner": 0.20510690633749057,
-    "most_lapsed": 0.44907049110270414,
+    "dr_learner": 0.2051069063374905,
+    "most_lapsed": 0.4490704911027041,
     "oracle": 1.0,
     "random": 0.0,
-    "t_learner": 0.15849505230378533,
+    "t_learner": 0.1584950523037853,
     "top_spenders": 0.1216248722459627,
-    "x_learner": 0.22480248806289752,
-    "x_learner_raw": 0.13191908770856053
-  }
+    "x_learner": 0.2248024880628975,
+    "x_learner_raw": 0.1319190877085605
+  },
+  "lake": {
+    "bronze/lines": {
+      "path": "C:\\Users\\rodri\\data\\b2b-lake\\bronze\\lines",
+      "rows": 1067371,
+      "version": 0
+    },
+    "silver/sales": {
+      "path": "C:\\Users\\rodri\\data\\b2b-lake\\silver\\sales",
+      "rows": 1003214,
+      "version": 0
+    },
+    "gold/customers": {
+      "path": "C:\\Users\\rodri\\data\\b2b-lake\\gold\\customers",
+      "rows": 5472,
+      "version": 0
+    },
+    "gold/recs_metrics": {
+      "path": "C:\\Users\\rodri\\data\\b2b-lake\\gold\\recs_metrics",
+      "rows": 13,
+      "version": 0
+    }
+  },
+  "mlflow_run": "38d514621b57405390a32abf46388d82"
 }

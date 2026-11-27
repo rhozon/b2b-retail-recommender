@@ -1,0 +1,59 @@
+# Databricks Asset Bundle: the same pipeline as a scheduled job on a Databricks workspace.
+# Deploy with the Databricks CLI (needs a workspace and a token, not included):
+#   databricks bundle validate -t dev
+#   databricks bundle deploy -t dev
+#   databricks bundle run b2b_retail_pipeline -t dev
+bundle:
+  name: b2b-retail-recommender
+
+variables:
+  catalog:
+    description: Unity Catalog catalog for the tables
+    default: main
+  schema:
+    description: Schema for the bronze, silver and gold tables
+    default: b2b_retail
+  raw_path:
+    description: Folder (volume) holding the raw Online Retail II lines as CSV
+    default: /Volumes/main/b2b_retail/raw/online_retail_ii
+
+resources:
+  jobs:
+    b2b_retail_pipeline:
+      name: b2b-retail-pipeline
+      schedule:
+        quartz_cron_expression: "0 0 5 ? * MON"
+        timezone_id: America/Sao_Paulo
+        pause_status: PAUSED
+      job_clusters:
+        - job_cluster_key: small
+          new_cluster:
+            spark_version: 15.4.x-cpu-ml-scala2.12
+            node_type_id: Standard_D4ds_v5
+            num_workers: 2
+      tasks:
+        - task_key: silver
+          job_cluster_key: small
+          spark_python_task:
+            python_file: ./databricks/01_silver.py
+            parameters: ["${var.raw_path}", "${var.catalog}", "${var.schema}"]
+        - task_key: als
+          depends_on: [{task_key: silver}]
+          job_cluster_key: small
+          spark_python_task:
+            python_file: ./databricks/02_als.py
+            parameters: ["${var.catalog}", "${var.schema}"]
+        - task_key: pipeline
+          depends_on: [{task_key: silver}]
+          job_cluster_key: small
+          spark_python_task:
+            python_file: ./databricks/03_pipeline.py
+            parameters: ["${var.catalog}", "${var.schema}"]
+          libraries:
+            - pypi: {package: "torch>=2.2"}
+            - pypi: {package: "python-calamine>=0.2"}
+
+targets:
+  dev:
+    mode: development
+    default: true

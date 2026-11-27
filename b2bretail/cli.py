@@ -9,7 +9,7 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-from . import assortment, data, export, impute, metrics, recs, segment, seqmodel, uplift
+from . import assortment, data, export, impute, lake, metrics, recs, sasrec, segment, seqmodel, tracking, uplift
 from .split import CUTOFF, VAL_CUTOFF, cold_share, make_split, targets
 
 
@@ -51,6 +51,27 @@ def tune(sales: pd.DataFrame, quick: bool) -> dict:
     seqmodel.fit(seqs, len(sv.items), epochs=2 if quick else 30, on_epoch=on_epoch)
     best["epochs"] = max(curve, key=curve.get)
     res.update({f"seq_epoch_{e}": v for e, v in curve.items()})
+
+    def curve_for(name, fitter, score, n_epochs):
+        c = {}
+
+        def cb(model, ep):
+            _, (_, nd) = evaluate_scores(score(model), users, tg, sv, True)
+            c[ep] = float(np.mean(nd))
+            log(f"  {name} epoch {ep}: validation NDCG@10 {c[ep]:.4f}")
+
+        fitter(cb, n_epochs)
+        return c
+
+    iseqs = sasrec.item_sequences(seqs)
+    c1 = curve_for("SASRec (items)", lambda cb, n: sasrec.fit(iseqs, len(sv.items), epochs=n, max_len=100, on_epoch=cb),
+                   lambda m: sasrec.scores(m, iseqs, users), 2 if quick else 12)
+    c2 = curve_for("SASRec (baskets)", lambda cb, n: sasrec.fit_baskets(seqs, len(sv.items), epochs=n, on_epoch=cb),
+                   lambda m: seqmodel.scores(m, seqs, users), 2 if quick else 40)
+    best["sasrec_items_epochs"] = max(c1, key=c1.get)
+    best["sasrec_baskets_epochs"] = max(c2, key=c2.get)
+    res.update({f"sasrec_items_epoch_{e}": v for e, v in c1.items()})
+    res.update({f"sasrec_baskets_epoch_{e}": v for e, v in c2.items()})
     return {"best": best, "validation_ndcg": res}
 
 
@@ -61,6 +82,8 @@ def main(argv=None) -> None:
     ap.add_argument("--site", default=None, help="folder for the simulator data (assets/case10)")
     ap.add_argument("--quick", action="store_true")
     ap.add_argument("--reuse-uplift", action="store_true", help="keep the promotion results already in --out")
+    ap.add_argument("--lake", default=None, help="folder for the bronze, silver and gold Delta tables")
+    ap.add_argument("--track", default=None, help="MLflow tracking URI, e.g. sqlite:///mlflow.db")
     a = ap.parse_args(argv)
     out = Path(a.out)
     out.mkdir(parents=True, exist_ok=True)
@@ -98,6 +121,9 @@ def main(argv=None) -> None:
     X, Y = recs.als(sp.R, factors=fac, alpha=alpha, iters=10 if a.quick else 15)
     seqs = seqmodel.basket_sequences(sp.train, sp.users, sp.items)
     model = seqmodel.fit(seqs, len(sp.items), epochs=b["epochs"])
+    iseqs = sasrec.item_sequences(seqs)
+    sas_i = sasrec.fit(iseqs, len(sp.items), epochs=b["sasrec_items_epochs"], max_len=100)
+    sas_b = sasrec.fit_baskets(seqs, len(sp.items), epochs=b["sasrec_baskets_epochs"])
 
     rows, per = [], {}
     for mode, new_only in (("new to the customer", True), ("all products", False)):
@@ -105,7 +131,9 @@ def main(argv=None) -> None:
         sc = {"Popularity (last 90 days)": recs.popularity(sp, users),
               "Item-to-item (co-purchase)": recs.item_knn(sp, users, S=S),
               "Implicit ALS": recs.als_scores(X, Y, users),
-              "Sequential GRU (PyTorch)": seqmodel.scores(model, seqs, users)}
+              "Sequential GRU (PyTorch)": seqmodel.scores(model, seqs, users),
+              "SASRec, product by product": sasrec.scores(sas_i, iseqs, users),
+              "SASRec, basket by basket": seqmodel.scores(sas_b, seqs, users)}
         if not new_only:
             sc["Buy again"] = recs.buy_again(sp, users)
         for name, s in sc.items():
@@ -189,6 +217,13 @@ def main(argv=None) -> None:
         sens.to_csv(out / "uplift_sensitivity.csv", index=False)
     summary["uplift"] = areas.set_index("policy")["mean"].to_dict()
 
+    (out / "summary.json").write_text(json.dumps(summary, indent=2, default=str))
+    if a.lake:
+        log("writing Delta tables")
+        summary["lake"] = lake.write_all(Path(a.lake), raw, sales, f, seg, rm)
+    if a.track:
+        log("logging the run to MLflow")
+        summary["mlflow_run"] = tracking.log_run(a.track, summary, rm, out)
     (out / "summary.json").write_text(json.dumps(summary, indent=2, default=str))
     if a.site:
         log("exporting simulator data")
